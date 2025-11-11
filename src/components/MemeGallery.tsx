@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react';
 import { type BlobItem, ContainerClient } from '@azure/storage-blob';
 import { Box } from '@mui/material';
 import ImageCard from './ImageCard';
-
-type BlobInfo = { name: string; url: string };
+import ImageModal, { type BlobInfo } from './ImageModal';
 
 export default function MemeGallery() {
 	const [images, setImages] = useState<BlobInfo[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [selectedImage, setSelectedImage] = useState<BlobInfo | null>(null);
+
+	const handleImageClick = (image: BlobInfo) => setSelectedImage(image);
+	const handleClose = () => setSelectedImage(null);
 
 	useEffect(() => {
 		async function load() {
@@ -31,7 +34,7 @@ export default function MemeGallery() {
 
 					const url = `https://${account}.blob.core.windows.net/${container}/${encodeURIComponent(
 						blob.name,
-					)}${sas}`;
+					)}`;
 					items.push({ name: blob.name, url });
 				}
 
@@ -46,25 +49,33 @@ export default function MemeGallery() {
 	}, []);
 
 	if (loading) return <p>Loading images…</p>;
-
 	if (error) return <p style={{ color: 'crimson' }}>Error: {error}</p>;
-
 	if (images.length === 0) return <p>No images found.</p>;
 
 	return (
-		<Box
-			sx={{
-				display: 'flex',
-				flexWrap: 'wrap',
-				gap: 3,
-				mt: 2,
-				maxWidth: '1200px',
-				justifyContent: 'center',
-			}}>
-			{images.map((image, index) => (
-                <ImageCard imageUrl={image.url} title={image.name} index={index} />
-			))}
-		</Box>
+		<>
+			<Box
+				sx={{
+					display: 'flex',
+					flexWrap: 'wrap',
+					gap: 3,
+					mt: 2,
+					maxWidth: '1200px',
+					justifyContent: 'center',
+				}}>
+				{images.map((image, index) => (
+					<ImageCard
+						key={image.name}
+						imageUrl={image.url}
+						title={image.name}
+						index={index}
+						onClick={() => handleImageClick(image)}
+						sx={{ cursor: 'pointer' }}
+					/>
+				))}
+			</Box>
+			<ImageModal image={selectedImage} onClose={handleClose} />
+		</>
 	);
 }
 

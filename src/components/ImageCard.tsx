@@ -1,15 +1,16 @@
-import { Card, CardMedia } from '@mui/material';
+import { Card, CardMedia, type CardProps } from '@mui/material';
 
-interface ImageCardProps {
+interface ImageCardProps extends CardProps {
 	imageUrl: string;
 	title?: string;
 	index?: number;
 }
 
-export default function ImageCard({ imageUrl, title, index }: ImageCardProps) {
+export default function ImageCard({ imageUrl, title, index, sx, ...cardProps }: ImageCardProps) {
 	return (
 		<Card
 			key={index}
+			{...cardProps}
 			sx={{
 				height: 300,
 				display: 'flex',
@@ -19,6 +20,7 @@ export default function ImageCard({ imageUrl, title, index }: ImageCardProps) {
 				'&:hover': {
 					transform: 'scale(1.05)',
 				},
+				...sx,
 			}}>
 			<CardMedia
 				component='img'
