@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardMedia from '@mui/material/CardMedia';
 import { useState, useEffect } from 'react';
+import MemeGallery from '../components/MemeGallery';
 
 const imageModules = import.meta.glob('../assets/images/*', { eager: true, as: 'url' });
 
@@ -38,6 +39,8 @@ export default function Memes() {
 				Memes for your entertainment
 			</Typography>
 
+			<MemeGallery />
+			
 			<Box
 				sx={{
 					display: 'flex',
