@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { type BlobItem, ContainerClient } from '@azure/storage-blob';
+import { type BlobItem } from '@azure/storage-blob';
 import { Box } from '@mui/material';
 import ImageCard from './ImageCard';
 import ImageModal, { type BlobInfo } from './ImageModal';
+import { getContainerClient, getLocalContainerClient } from '../services/AzureService';
 
 export default function MemeGallery() {
 	const [images, setImages] = useState<BlobInfo[]>([]);
@@ -16,25 +17,14 @@ export default function MemeGallery() {
 	useEffect(() => {
 		async function load() {
 			try {
-				const account = import.meta.env.VITE_AZURE_STORAGE_ACCOUNT as string;
-				const container = import.meta.env.VITE_AZURE_STORAGE_CONTAINER as string;
-				const sas = import.meta.env.VITE_AZURE_STORAGE_SAS as string;
-
-				if (!account || !container || !sas) {
-					throw new Error('Missing Azure config.');
-				}
-
-				const containerClient = new ContainerClient(
-					`https://${account}.blob.core.windows.net/${container}${sas}`,
-				);
+				const client = import.meta.env.DEV ? getLocalContainerClient() : getContainerClient();
 
 				const items: BlobInfo[] = [];
-				for await (const blob of containerClient.listBlobsFlat()) {
+				for await (const blob of client.listBlobsFlat()) {
 					if (!isLikelyImage(blob)) continue;
 
-					const url = `https://${account}.blob.core.windows.net/${container}/${encodeURIComponent(
-						blob.name,
-					)}`;
+					const blobClient = client.getBlobClient(blob.name);
+					const url = blobClient.url;
 					items.push({ name: blob.name, url });
 				}
 
